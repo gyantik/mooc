@@ -1,0 +1,111 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MOOC Exam Prep – Conservation Geography</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1d2430;--mu:#6b7280;--ac:#2563eb;--ok:#16a34a;--bad:#dc2626;--bd:#d9dde3;--okb:#dcfce7;--badb:#fee2e2}
+:root[data-t=dark]{--bg:#12161c;--card:#1b222b;--tx:#e6e9ee;--mu:#9aa4b2;--ac:#60a5fa;--ok:#4ade80;--bad:#f87171;--bd:#323b47;--okb:#14351f;--badb:#40191a}
+*{box-sizing:border-box}body{margin:0;font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+header{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 20px;background:var(--card);border-bottom:1px solid var(--bd)}
+header b{margin-right:auto}main{max-width:860px;margin:20px auto;padding:0 16px}
+button,select,input{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:7px 14px}
+button{cursor:pointer}button:hover{border-color:var(--ac)}button.p{background:var(--ac);border-color:var(--ac);color:#fff}button.on{border-color:var(--ac);color:var(--ac);font-weight:600}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.stat b{font-size:26px;display:block}.mu{color:var(--mu);font-size:14px}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:11px 14px}.opt.sel{border-color:var(--ac);background:rgba(37,99,235,.1)}
+.opt.ok{background:var(--okb);border-color:var(--ok)}.opt.no{background:var(--badb);border-color:var(--bad)}
+.opt:disabled{color:var(--tx);opacity:1;cursor:default}.bar{height:8px;background:var(--bd);border-radius:5px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ac)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}.sp{margin-left:auto}
+table{width:100%;border-collapse:collapse}td,th{padding:5px 8px;border-bottom:1px solid var(--bd);text-align:left}
+.tag{font-size:12px;padding:1px 8px;border-radius:9px;border:1px solid var(--bd);color:var(--mu)}
+</style></head><body>
+<header><b>📚 Conservation Geography – Exam Prep</b><span id="nav"></span><button id="dk" title="Dark mode">🌓</button></header>
+<main id="m"></main>
+<script src="questions.js"></script>
+<script>
+const Q=window.QUESTION_BANK,BY=Object.fromEntries(Q.map(q=>[q.id,q])),$=s=>document.querySelector(s),DAY=864e5,INT=[0,1,3,7,14];
+let S={};try{S=JSON.parse(localStorage.getItem('mcqprep')||'{}')}catch(e){}
+S.st=S.st||{};S.tests=S.tests||[];S.dark=!!S.dark;
+const save=()=>{try{localStorage.setItem('mcqprep',JSON.stringify(S))}catch(e){}};
+const st=id=>S.st[id]||(S.st[id]={att:0,cor:0,wc:0,box:0,due:0,mark:false,last:null});
+const mastered=id=>{const s=S.st[id];return s&&s.box>=3&&s.last=='c'};
+const wrongL=()=>Q.filter(q=>S.st[q.id]&&S.st[q.id].last=='w');
+const dueL=()=>Q.filter(q=>{const s=S.st[q.id];return s&&s.att&&s.due<=Date.now()&&!mastered(q.id)});
+const markedL=()=>Q.filter(q=>S.st[q.id]&&S.st[q.id].mark);
+function rec(id,ok){const s=st(id);s.att++;if(ok){s.cor++;s.box=Math.min(4,s.box+1)}else{s.wc++;s.box=0}s.last=ok?'c':'w';s.due=Date.now()+INT[s.box]*DAY;save()}
+const shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const pct=(a,b)=>b?Math.round(100*a/b):0;let V='dash',X=null;
+function go(v){V=v;X=null;draw()}
+function draw(){document.documentElement.dataset.t=S.dark?'dark':'';
+ $('#nav').innerHTML=[['dash','Dashboard'],['learn','Learn'],['rev','Revision'],['test','Tests']].map(([k,l])=>`<button class="${V==k?'on':''}" onclick="go('${k}')">${l}</button>`).join(' ');
+ if(V=='dash')dash();else if(V=='rev')rev();else if(V=='learn'||V=='test')X?run():setup(V)}
+$('#dk').onclick=()=>{S.dark=!S.dark;save();draw()};
+const weekSel=(id='wk')=>`<select id="${id}"><option value="0">All assignments</option>${[...Array(12)].map((_,i)=>`<option value="${i+1}">Assignment ${i+1}</option>`).join('')}</select>`;
+function dash(){const at=Q.filter(q=>S.st[q.id]&&S.st[q.id].att),ca=Object.values(S.st).reduce((a,s)=>a+s.cor,0),ta=Object.values(S.st).reduce((a,s)=>a+s.att,0),bl=dueL().length,mc=Q.filter(q=>mastered(q.id)).length;
+ const rows=[...Array(12)].map((_,i)=>{const w=Q.filter(q=>q.week==i+1),a=w.filter(q=>S.st[q.id]&&S.st[q.id].att).length,m=w.filter(q=>mastered(q.id)).length;return`<tr><td>Assignment ${i+1}</td><td>${a}/${w.length} attempted</td><td>${m} mastered</td><td style="width:35%"><div class="bar"><i style="width:${pct(m,w.length)}%"></i></div></td></tr>`}).join('');
+ const rec=wrongL().length?`Redo your ${wrongL().length} wrong answers in Revision`:bl?`Revise ${bl} due questions`:at.length<Q.length?'Continue Learn mode on unseen questions':'Take a full-syllabus mock test';
+ $('#m').innerHTML=`<div class="grid">${[['Questions',Q.length],['Attempted',at.length],['Mastered',mc],['Accuracy',pct(ca,ta)+'%'],['Revision backlog',bl],['Wrong now',wrongL().length]].map(([a,b])=>`<div class="card stat"><b>${b}</b><span class="mu">${a}</span></div>`).join('')}</div>
+ <div class="card"><b>Recommended next:</b> ${rec}</div><div class="card"><h3>Assignment progress</h3><table>${rows}</table></div>
+ <div class="card"><h3>Recent tests</h3>${S.tests.length?`<table>${S.tests.slice(-8).reverse().map(t=>`<tr><td>${new Date(t.d).toLocaleString()}</td><td>${t.name}</td><td>${t.c}/${t.n} (${pct(t.c,t.n)}%)</td><td>${Math.round(t.sec/60)} min</td></tr>`).join('')}</table>`:'<span class="mu">No tests taken yet.</span>'}</div>
+ <div class="card row"><button onclick="exp()">Export progress</button><label class="tag" style="padding:6px 12px;cursor:pointer">Import progress<input type="file" accept=".json" hidden onchange="imp(this.files[0])"></label><button onclick="if(confirm('Reset ALL progress?')){S={st:{},tests:[],dark:S.dark};save();draw()}">Reset</button></div>`}
+function exp(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='mcq-progress.json';a.click()}
+function imp(f){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.st)throw 0;S=d;save();draw()}catch(e){alert('Invalid file')}};r.readAsText(f)}
+function setup(k){const L=k=='learn';
+ $('#m').innerHTML=`<div class="card"><h3>${L?'Learn mode':'Practice tests'}</h3>`+(L?`<div class="row">${weekSel()}<label><input type="checkbox" id="sh"> Shuffle questions</label><label><input type="checkbox" id="so"> Shuffle options</label><label><input type="checkbox" id="un"> Unseen only</label></div><button class="p" onclick="startLearn()">Start</button>`
+ :`<div class="row"><select id="tt"><option value="week">Assignment-wise test</option><option value="full">All 12 assignments, jumbled (120)</option><option value="custom">Custom number of questions</option><option value="wrong">Incorrect questions only</option><option value="rand">Random mixed (20)</option><option value="mock">Timed mock exam (30 Qs, 30 min)</option></select>${weekSel()}<input id="nq" type="number" min="1" max="120" value="25" style="width:80px"></div><p class="mu">Custom: applies to the selected assignment (or all). Explanations hidden until you submit.</p><button class="p" onclick="startTest()">Start test</button>`)+'</div>'}
+function mk(list,o){X=Object.assign({scroll:o.mode=='learn',list,i:0,ans:{},sub:{},ord:{},t0:Date.now()},o);list.forEach(q=>X.ord[q.id]=o.so?shuf([0,1,2,3]):[0,1,2,3]);run()}
+function startLearn(){let l=Q.filter(q=>!+$('#wk').value||q.week==+$('#wk').value);if($('#un').checked)l=l.filter(q=>!S.st[q.id]||!S.st[q.id].att);if(!l.length)return alert('No questions match.');if($('#sh').checked)l=shuf(l);mk(l,{mode:'learn',so:$('#so').checked,name:+$('#wk').value?'Assignment '+$('#wk').value:'All assignments'})}
+function startTest(){const t=$('#tt').value,w=+$('#wk').value,n=Math.max(1,+$('#nq').value||10);let l,name=t;
+ const pool=w?Q.filter(q=>q.week==w):Q;
+ if(t=='week'){l=w?pool:Q.filter(q=>q.week==1);name='Assignment '+(w||1)}else if(t=='full'){l=Q}else if(t=='custom'){l=shuf(pool).slice(0,n)}else if(t=='wrong'){l=wrongL();name='Wrong only'}else if(t=='rand'){l=shuf(Q).slice(0,20)}else{l=shuf(Q).slice(0,30);name='Timed mock'}
+ if(!l.length)return alert('No questions available for this test.');
+ mk(shuf(l),{mode:'test',so:true,name:({week:name,full:'All 12 jumbled',custom:'Custom ('+l.length+')',wrong:name,rand:'Random mix',mock:name})[t],end:t=='mock'?Date.now()+18e5:0})}
+function run(){if(X.scroll)return runL();const x=X,q=x.list[x.i],o=x.ord[q.id],sub=x.sub[q.id],s=st(q.id),L=x.mode=='learn';
+ const ok=x.ans[q.id]===q.answer;
+ $('#m').innerHTML=`<div class="row"><span class="tag">Assignment ${q.week} · Q${q.num}</span><span class="mu">${x.i+1} / ${x.list.length}</span>${x.end?'<span class="tag" id="tm"></span>':''}<span class="sp"></span>${s.mark?'<span class="tag">★ marked</span>':''}</div>
+ <div class="bar"><i style="width:${pct(x.i+1,x.list.length)}%"></i></div><div class="card" style="margin-top:12px"><p style="font-size:18px"><b>${esc(q.q)}</b></p>
+ ${o.map((oi,k)=>{let c='opt';if(sub&&oi==q.answer)c+=' ok';else if(sub&&x.ans[q.id]===oi)c+=' no';else if(x.ans[q.id]===oi)c+=' sel';return`<button class="${c}" ${sub?'disabled':''} onclick="pick(${oi})"><b>${'ABCD'[k]}.</b> ${esc(q.options[oi])}</button>`}).join('')}
+ ${sub?`<div class="card" style="background:var(--bg)">${ok?'✅ <b>Correct!</b>':x.ans[q.id]===undefined?'⚠️ Not answered.':'❌ <b>Incorrect.</b>'} Official answer: <b>${esc(q.options[q.answer])}</b></div>`:''}</div>
+ <div class="row"><button onclick="mv(-1)" ${x.i?'':'disabled'}>← Previous</button>${L&&!sub?`<button class="p" onclick="subm()" ${x.ans[q.id]===undefined?'disabled':''}>Submit (Enter)</button>`:''}
+ <button onclick="mv(1)" ${x.i<x.list.length-1?'':'disabled'}>Next →</button><button onclick="mark()">${s.mark?'Unmark':'Mark for revision'} (M)</button><span class="sp"></span>
+ ${L?`<button onclick="go('dash')">Exit</button>`:`<button class="p" onclick="fin()">Finish test</button>`}</div>`;
+ if(x.end)tick()}
+function tick(){if(!X||!X.end)return;const r=X.end-Date.now();if(r<=0)return fin();const e=$('#tm');if(e)e.textContent='⏱ '+Math.floor(r/6e4)+':'+String(Math.floor(r/1e3)%60).padStart(2,'0');clearTimeout(X.tt);X.tt=setTimeout(tick,1e3)}
+function pick(oi){const q=X.list[X.i];if(X.sub[q.id])return;X.ans[q.id]=oi;run()}
+function subm(){const q=X.list[X.i];if(X.ans[q.id]===undefined||X.sub[q.id])return;X.sub[q.id]=1;rec(q.id,X.ans[q.id]===q.answer);run()}
+function mv(d){const n=X.i+d;if(n>=0&&n<X.list.length){X.i=n;run()}}
+function mark(){const s=st(X.list[X.i].id);s.mark=!s.mark;save();run()}
+function fin(){clearTimeout(X.tt);const x=X;let c=0,w=0,u=0;const wk={};
+ x.list.forEach(q=>{const a=x.ans[q.id],W=wk[q.week]=wk[q.week]||{c:0,n:0};W.n++;if(a===undefined)u++;else if(a===q.answer){c++;W.c++}else w++;if(a!==undefined)rec(q.id,a===q.answer);else if(x.mode=='test'){/* unattempted: not counted as attempt */}});
+ const sec=(Date.now()-x.t0)/1e3;S.tests.push({d:Date.now(),name:x.name,n:x.list.length,c,sec});save();X=null;V='res';
+ const bad=x.list.filter(q=>x.ans[q.id]!==q.answer),weak=Object.entries(wk).filter(([k,v])=>v.c/v.n<.7).map(([k])=>'Assignment '+k);
+ $('#nav').innerHTML='';$('#m').innerHTML=`<div class="card"><h2>Results – ${x.name}</h2><div class="grid">${[['Total',x.list.length],['Correct',c],['Incorrect',w],['Unattempted',u],['Score',c+'/'+x.list.length],['Accuracy',pct(c,x.list.length)+'%'],['Time',Math.floor(sec/60)+'m '+Math.round(sec%60)+'s']].map(([a,b])=>`<div class="stat"><b>${b}</b><span class="mu">${a}</span></div>`).join('')}</div></div>
+ <div class="card"><h3>Assignment-wise</h3><table>${Object.entries(wk).map(([k,v])=>`<tr><td>Assignment ${k}</td><td>${v.c}/${v.n}</td><td>${pct(v.c,v.n)}%</td></tr>`).join('')}</table><p><b>Needs more revision:</b> ${weak.join(', ')||'none – nice work'}</p></div>
+ <div class="card"><h3>Review of missed/unattempted (${bad.length})</h3>${bad.map(q=>{const a=x.ans[q.id];return`<p><span class="tag">A${q.week} Q${q.num}</span> <b>${esc(q.q)}</b><br>${a===undefined?'<span class="mu">Not attempted</span>':`❌ Your answer: ${esc(q.options[a])}`}<br>✅ Correct: <b>${esc(q.options[q.answer])}</b></p>`}).join('')||'Perfect score!'}</div><button class="p" onclick="go('dash')">Dashboard</button>`}
+function rev(){const w=wrongL(),d=dueL(),m=markedL();
+ $('#m').innerHTML=`<div class="card"><h3>Revision</h3><p class="mu">Spaced repetition: wrong answers return the next session; correct ones come back after 1, 3, 7, 14 days. 2+ correct in a row = mastered.</p>
+ <div class="row"><button class="p" onclick="rv(wrongL(),'Wrong')">Retry wrong answers (${w.length})</button><button onclick="rv(dueL(),'Due')">Due for revision (${d.length})</button><button onclick="rv(markedL(),'Marked')">Marked (${m.length})</button></div>
+ <div class="row">${weekSel('rw')}<button onclick="const w=+$('#rw').value;rv(Q.filter(q=>!w||q.week==w),'Assignment')">Revise assignment</button></div></div>
+ <div class="card"><h3>Wrong Answers</h3>${w.length?`<table><tr><th>Q</th><th>Question</th><th>Mistakes</th></tr>${w.map(q=>`<tr><td>A${q.week}Q${q.num}</td><td>${esc(q.q)}</td><td>${S.st[q.id].wc}×</td></tr>`).join('')}</table>`:'<span class="mu">None right now.</span>'}</div>
+ <div class="card"><h3>Repeated mistakes (2+)</h3>${Q.filter(q=>S.st[q.id]&&S.st[q.id].wc>=2).map(q=>`<div>A${q.week}Q${q.num}: ${esc(q.q)} <span class="tag">${S.st[q.id].wc}×</span></div>`).join('')||'<span class="mu">None.</span>'}</div>`}
+function rv(l,n){if(!l.length)return alert('Nothing to revise here.');mk(shuf(l),{mode:'learn',so:true,name:n})}
+document.addEventListener('keydown',e=>{if(!X||X.scroll||e.target.tagName=='INPUT'||e.target.tagName=='SELECT')return;const q=X.list[X.i],k=e.key.toLowerCase();
+ if('1234abcd'.includes(k)&&k.length==1){const n='1234'.includes(k)?+k-1:k.charCodeAt(0)-97;pick(X.ord[q.id][n])}
+ else if(k=='enter'){X.mode=='learn'&&!X.sub[q.id]?subm():mv(1)}else if(k=='arrowright')mv(1);else if(k=='arrowleft')mv(-1);else if(k=='m')mark()});
+
+function qc(i){const x=X,q=x.list[i],o=x.ord[q.id],a=x.ans[q.id],s=st(q.id);
+ return `<div class="card" id="c${i}"><div class="row"><span class="tag">Assignment ${q.week} · Q${q.num}</span><span class="mu">${i+1} / ${x.list.length}</span><span class="sp"></span><button onclick="mk2(${i})">${s.mark?'★ Marked':'☆ Mark for revision'}</button></div><p style="font-size:18px"><b>${esc(q.q)}</b></p>${o.map((oi,k)=>{let c='opt';if(a!==undefined){if(oi==q.answer)c+=' ok';else if(a===oi)c+=' no'}return`<button class="${c}" ${a!==undefined?'disabled':''} onclick="pickL(${i},${oi})"><b>${'ABCD'[k]}.</b> ${esc(q.options[oi])}</button>`}).join('')}</div>`}
+function runL(){const x=X;$('#m').innerHTML=`<div id="sb" class="card" style="position:sticky;top:0;z-index:5;padding:10px 18px"></div>`+x.list.map((q,i)=>qc(i)).join('')+`<div class="row"><button class="p" onclick="finL()">Submit assignment</button><button onclick="go('dash')">Exit</button></div>`;updSB();window.scrollTo(0,0)}
+function updSB(){const x=X,n=x.list.length,a=x.list.filter(q=>x.ans[q.id]!==undefined).length,c=x.list.filter(q=>x.ans[q.id]===q.answer).length;
+ $('#sb').innerHTML=`<div class="row" style="margin:0"><b>${x.name||'Practice'}</b><span>Answered ${a}/${n}</span><span style="color:var(--ok)">✔ ${c}</span><span style="color:var(--bad)">✘ ${a-c}</span><span class="sp"></span><button class="p" onclick="finL()">Submit</button></div><div class="bar" style="margin-top:6px"><i style="width:${pct(a,n)}%"></i></div>`}
+function pickL(i,oi){const q=X.list[i];if(X.ans[q.id]!==undefined)return;X.ans[q.id]=oi;rec(q.id,oi===q.answer);$('#c'+i).outerHTML=qc(i);updSB()}
+function mk2(i){const s=st(X.list[i].id);s.mark=!s.mark;save();$('#c'+i).outerHTML=qc(i)}
+function finL(){const x=X,n=x.list.length,a=x.list.filter(q=>x.ans[q.id]!==undefined),c=a.filter(q=>x.ans[q.id]===q.answer).length,bad=x.list.filter(q=>x.ans[q.id]!==q.answer);
+ if(a.length<n&&!confirm((n-a.length)+' question(s) not answered yet. Submit anyway?'))return;
+ S.tests.push({d:Date.now(),name:'Practice – '+(x.name||('Assignment '+(x.list[0].week))),n,c,sec:(Date.now()-x.t0)/1e3});save();
+ const old=$('#res');if(old)old.remove();
+ $('#m').insertAdjacentHTML('afterbegin',`<div class="card" id="res"><h2>Submitted ✔</h2><div class="grid"><div class="stat"><b>${c}/${n}</b><span class="mu">Score</span></div><div class="stat"><b>${pct(c,n)}%</b><span class="mu">Accuracy</span></div><div class="stat"><b>${a.length-c}</b><span class="mu">Wrong</span></div><div class="stat"><b>${n-a.length}</b><span class="mu">Unanswered</span></div></div>
+ <h3>Review (${bad.length})</h3>${bad.map(q=>{const y=x.ans[q.id];return`<p><span class="tag">A${q.week} Q${q.num}</span> <b>${esc(q.q)}</b><br>${y===undefined?'<span class="mu">Not answered</span>':'❌ Your answer: '+esc(q.options[y])}<br>✅ Correct: <b>${esc(q.options[q.answer])}</b></p>`}).join('')||'Perfect score!'}
+ <button class="p" onclick="go('dash')">Dashboard</button></div>`);window.scrollTo(0,0)}
+function draw0(){}
+draw();
+</script></body></html>
